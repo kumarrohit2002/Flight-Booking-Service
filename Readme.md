@@ -49,7 +49,7 @@ Lets take a look inside the `src` folder
   ```
 
 
- - go inside the *src- folder and execute the following command:
+ - go inside the `src`- folder and execute the following command:
  ```
   npx sequelize init
  ```
