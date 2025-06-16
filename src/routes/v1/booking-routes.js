@@ -6,6 +6,9 @@ const {BookingController}=require('../../controllers')
 // POST '/api/v1/bookings
 router.post('/',BookingController.createBooking);
 
+// POST '/api/v1/bookings/payment
+router.post('/payments',BookingController.makePayment);
+
 
 
 module.exports=router;
