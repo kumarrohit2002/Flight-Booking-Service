@@ -48,7 +48,7 @@ async function makePayment(data){
         const currentTime=new Date();
 
         if(currentTime-bookingTime > 300000){ // 5 min
-                await bookingRepository.update(data.bookingId,{status:CANCELLED},transaction);
+                await cancelBooking(data.bookingId)
             throw new AppError('booking has expire',StatusCodes.BAD_REQUEST)
         }
 
@@ -62,6 +62,30 @@ async function makePayment(data){
         await transaction.commit();
 
     } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
+}
+
+
+async function cancelBooking(bookingId){
+    const transaction=await db.sequelize.transaction();
+    try {
+        const bookingDetals=await bookingRepository.get(bookingId,transaction);
+        if(bookingDetals.status == CANCELLED){ 
+            await transaction.commit();
+            return true;
+        }
+
+        await axios.patch(`${ServerConfig.FLIGHT_SERVICE}/api/v1/flights/${bookingDetals.flightId}/seats`,{seats:bookingDetals.noOfSeats,dec:0}); 
+
+        await bookingRepository.update(bookingId,{status:CANCELLED},transaction);
+
+        await transaction.commit();
+
+        
+    } catch (error) {
+        console.log(error)
         await transaction.rollback();
         throw error;
     }
